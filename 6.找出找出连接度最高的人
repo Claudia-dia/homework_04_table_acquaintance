@@ -1,0 +1,26 @@
+create table acquaintance
+( friend1 varchar(100),
+  friend2 varchar(100),
+  class   varchar(100)
+)
+
+--5找出这样的人，通过他而结识的朋友对最多(p1和p2原本不相识，他们通过p3结识，那么p3的连接度为1，找出连接度最高的人)。
+
+with cte as (           --取出中间人及对应的关系
+select t1.friend2 as name1, t2.friend2 as name2,t1.friend1 as 中间人
+from acquaintance t1 inner join acquaintance t2 on t1.friend1=t2.friend1
+union all
+select t1.friend2 as name1, t2.friend1 as name2,t1.friend1 as 中间人
+from acquaintance t1 inner join acquaintance t2 on t1.friend1=t2.friend2
+union all
+select t1.friend1 as name1, t2.friend2 as name2,t1.friend1 as 中间人
+from acquaintance t1 inner join acquaintance t2 on t1.friend2=t2.friend1
+union all
+select t1.friend1 as name1, t2.friend1 as name2,t1.friend1 as 中间人
+from acquaintance t1 inner join acquaintance t2 on t1.friend2=t2.friend2)
+ 
+select top 1 中间人 from (           --取中间人连接最多的
+select 中间人,count(*) cn from       --排除已经认识的
+(select * from cte t where not exists (select 1 from acquaintance 
+where (friend1=t.name1 and friend2=t.name2) or (friend2=t.name1 and friend1=t.name2) )) t
+group by 中间人 order by cn desc)t
