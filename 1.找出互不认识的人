@@ -1,0 +1,72 @@
+CREATE TABLE `t` (
+  `f1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `f2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `class` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+
+SELECT
+ * 
+FROM
+ (
+SELECT
+	c.f,
+	d.f f1
+FROM
+	(
+		SELECT DISTINCT
+			f
+		FROM
+			(
+				(SELECT DISTINCT f1 AS f FROM t)
+				UNION ALL
+					(SELECT DISTINCT f2 AS f FROM t)
+			) AS a
+	) c,
+	(
+		SELECT DISTINCT
+			f
+		FROM
+			(
+				(SELECT DISTINCT f1 AS f FROM t)
+				UNION ALL
+					(SELECT DISTINCT f2 AS f FROM t)
+			) AS a
+	) d
+WHERE
+	c.f != d.f
+ ) g 
+WHERE
+ CONCAT( g.f, g.f1 ) NOT IN (
+SELECT
+	CONCAT(c.f, d.f)
+FROM
+	(
+		SELECT DISTINCT
+			f
+		FROM
+			(
+				(SELECT DISTINCT f1 AS f FROM t)
+				UNION ALL
+					(SELECT DISTINCT f2 AS f FROM t)
+			) AS a
+	) c,
+	(
+		SELECT DISTINCT
+			f
+		FROM
+			(
+				(SELECT DISTINCT f1 AS f FROM t)
+				UNION ALL
+					(SELECT DISTINCT f2 AS f FROM t)
+			) AS a
+	) d,
+	t
+WHERE
+ c.f != d.f 
+ AND (
+ ( t.f1 = c.f AND t.f2 = d.f ) 
+ OR ( t.f1 = d.f AND t.f2 = c.f ) 
+ ) 
+ )
