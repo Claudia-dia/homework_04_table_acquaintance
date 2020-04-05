@@ -1,0 +1,53 @@
+create table acquaintance
+( friend1 varchar(100),
+  friend2 varchar(100),
+  class   varchar(100)
+)
+ 
+-- ²âÊÔÊı¾İ
+while (select count(1) from acquaintance) < 100
+begin
+    declare @class varchar(100),@classint int
+    select @classint = ceiling(rand()*3)
+    select @class = case when @classint=1
+                           then '±ÊÓÑ'
+                         when @classint=2 
+                           then 'ÇòÓÑ'
+                         when @classint=3
+                           then 'ÍøÓÑ'
+                    end
+    insert into acquaintance
+    select char(64+ceiling(rand()*26)),char(64+ceiling(rand()*26)),@class
+     
+    delete a from acquaintance a
+    where  a.friend1 = a.friend2
+           or exists ( select 1
+                       from (
+                               select *
+                               from  ( select friend1,friend2
+                                       from   acquaintance
+                                       union all
+                                       select friend2,friend1
+                                       from   acquaintance
+                                     ) a
+                               group by friend1,friend2
+                               having count(1) > 1 
+                            ) b
+                       where a.friend1 = b.friend1
+                             and a.friend2 = b.friend2
+                    )
+           or exists ( select 1
+                       from (
+                               select *
+                               from  ( select friend1,friend2
+                                       from   acquaintance
+                                     ) a
+                               group by friend1,friend2
+                               having count(1) > 1 
+                            ) b
+                       where a.friend1 = b.friend1
+                             and a.friend2 = b.friend2
+                    )
+ 
+end 
+                   
