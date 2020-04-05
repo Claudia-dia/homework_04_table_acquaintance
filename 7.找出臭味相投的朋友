@@ -1,0 +1,13 @@
+declare @tab table (f1 char(1),f2 char(2),class varchar(10));
+insert into @tab 
+ select 'a','b','reading' union all select 'a','c','reading' union all
+ select 'a','b','soccer' union all select 'c','d','soccer' union all
+ select 'd','e','soccer' union all select 'e','f','soccer' union all
+ select 'b','a','drinking' union all select 'c','e','drinking' union all
+ select 'd','e','drinking';
+
+-- 7
+select f1,f2,class from @tab t1
+where not exists (select * from @tab t2
+where not exists(select * from @tab where class=t2.class 
+and ((f1=t1.f1 and f2=t1.f2) or (f1=t1.f2 and f2=t1.f1))));
